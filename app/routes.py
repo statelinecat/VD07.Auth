@@ -46,51 +46,9 @@ def logout():
 @app.route('/account')
 @login_required
 def account():
-    return render_template('account.html')
-
-# @app.route('/edit', methods=['GET', 'POST'])
-# def edit():
-#     # if current_user.is_authenticated:
-#     #     return redirect(url_for('home'))
-#     form = RegistrationForm()
-#     if form.validate_on_submit():
-#         hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
-#         user = User(username=form.username.data, email=form.email.data, password=hashed_password)
-#         db.session.add(user)
-#         db.session.commit()
-#         flash('Вы успешно изменили свои данные!', 'success')
-#         return redirect(url_for('login'))
-#     return render_template('edit.html', form=form, title='Edit')
-
-# @app.route('/edit_profile', methods=['GET', 'POST'])
-# @login_required
-# def edit_profile():
-#     form = ProfileForm(current_user.username, current_user.email)
-#
-#     if form.validate_on_submit():
-#         current_user.username = form.username.data
-#         current_user.email = form.email.data
-#
-#         if form.new_password.data:
-#             current_user.password = bcrypt.generate_password_hash(form.new_password.data).decode('utf-8')
-#
-#         db.session.commit()
-#         flash('Профиль успешно обновлен!', 'success')
-#         return redirect(url_for('account'))
-#
-#     return render_template('edit_profile.html', form=form, title='Edit Profile')
+    return render_template('account.html', name=current_user.username, email=current_user.email)
 
 
-# class ProfileForm(FlaskForm):
-#     username = StringField('Username', validators=[DataRequired(), Length(min=2, max=20)])
-#     email = EmailField('Email', validators=[DataRequired(), Email()])
-#     new_password = PasswordField('New Password', validators=[Optional(), EqualTo('confirm_password')])
-#     confirm_password = PasswordField('Confirm Password', validators=[EqualTo('new_password')])
-#
-#     def __init__(self, username, email, *args, **kwargs):
-#         super().__init__(*args, **kwargs)
-#         self.username.data = username
-#         self.email.data = email
 
 
 @app.route('/delete_account')
