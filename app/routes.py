@@ -2,7 +2,7 @@ from flask import render_template, request, redirect, url_for, flash
 from flask_login import login_user, logout_user, current_user, login_required
 from app.models import User
 from app import app, db, bcrypt
-from app.forms import RegistrationForm, LoginForm
+from app.forms import RegistrationForm, LoginForm, EditProfileForm
 
 @app.route('/')
 @app.route('/home')
@@ -62,35 +62,35 @@ def account():
 #         return redirect(url_for('login'))
 #     return render_template('edit.html', form=form, title='Edit')
 
-@app.route('/edit_profile', methods=['GET', 'POST'])
-@login_required
-def edit_profile():
-    form = ProfileForm(current_user.username, current_user.email)
+# @app.route('/edit_profile', methods=['GET', 'POST'])
+# @login_required
+# def edit_profile():
+#     form = ProfileForm(current_user.username, current_user.email)
+#
+#     if form.validate_on_submit():
+#         current_user.username = form.username.data
+#         current_user.email = form.email.data
+#
+#         if form.new_password.data:
+#             current_user.password = bcrypt.generate_password_hash(form.new_password.data).decode('utf-8')
+#
+#         db.session.commit()
+#         flash('Профиль успешно обновлен!', 'success')
+#         return redirect(url_for('account'))
+#
+#     return render_template('edit_profile.html', form=form, title='Edit Profile')
 
-    if form.validate_on_submit():
-        current_user.username = form.username.data
-        current_user.email = form.email.data
 
-        if form.new_password.data:
-            current_user.password = bcrypt.generate_password_hash(form.new_password.data).decode('utf-8')
-
-        db.session.commit()
-        flash('Профиль успешно обновлен!', 'success')
-        return redirect(url_for('account'))
-
-    return render_template('edit_profile.html', form=form, title='Edit Profile')
-
-
-class ProfileForm(FlaskForm):
-    username = StringField('Username', validators=[DataRequired(), Length(min=2, max=20)])
-    email = EmailField('Email', validators=[DataRequired(), Email()])
-    new_password = PasswordField('New Password', validators=[Optional(), EqualTo('confirm_password')])
-    confirm_password = PasswordField('Confirm Password', validators=[EqualTo('new_password')])
-
-    def __init__(self, username, email, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.username.data = username
-        self.email.data = email
+# class ProfileForm(FlaskForm):
+#     username = StringField('Username', validators=[DataRequired(), Length(min=2, max=20)])
+#     email = EmailField('Email', validators=[DataRequired(), Email()])
+#     new_password = PasswordField('New Password', validators=[Optional(), EqualTo('confirm_password')])
+#     confirm_password = PasswordField('Confirm Password', validators=[EqualTo('new_password')])
+#
+#     def __init__(self, username, email, *args, **kwargs):
+#         super().__init__(*args, **kwargs)
+#         self.username.data = username
+#         self.email.data = email
 
 
 @app.route('/delete_account')
@@ -102,3 +102,20 @@ def delete_account():
     logout_user()
     flash('Ваш аккаунт был удален.', 'warning')
     return redirect(url_for('home'))
+
+@app.route('/edit_account', methods=['GET', 'POST'])
+@login_required
+def edit_account():
+    form = EditProfileForm()
+    if form.validate_on_submit():
+        current_user.username = form.username.data
+        current_user.email = form.email.data
+        hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
+        current_user.password = hashed_password
+        db.session.commit()
+        flash('Ваш профиль был обновлен!', 'success')
+        return redirect(url_for('account'))
+    elif request.method == 'GET':
+        form.username.data = current_user.username
+        form.email.data = current_user.email
+    return render_template('edit_account.html', form=form, title='Edit Account')
